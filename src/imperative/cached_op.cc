@@ -100,7 +100,6 @@ CachedOp::CachedOp(
   static const std::vector<const Op*> zero_ops{Op::Get("zeros_like"), Op::Get("_zeros")};
   static const auto _copy = Op::Get("_copy");
   config_.Init(flags);
-  config_.is_dynamic = false;
 
   if (config_.static_shape) {
     CHECK(config_.static_alloc) << "static_alloc must be True when static_shape is True";

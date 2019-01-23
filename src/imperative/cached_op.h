@@ -67,6 +67,9 @@ struct CachedOpConfig : public dmlc::Parameter<CachedOpConfig> {
     DMLC_DECLARE_FIELD(subgraph)
     .set_default(std::string(""))
     .describe("JSON string of a subgraph.");
+    DMLC_DECLARE_FIELD(is_dynamic)
+    .set_default(false)
+    .describe("Whether the graph contains dynamic shape operators.");
   }
 };
 

@@ -893,8 +893,7 @@ class HybridBlock(Block):
         for name, param in self.collect_params().items():
             if name in arg_names:
                 arg_dict['arg:%s'%name] = param._reduce()
-            else:
-                assert name in aux_names
+            elif name in aux_names:
                 arg_dict['aux:%s'%name] = param._reduce()
         ndarray.save('%s-%04d.params'%(path, epoch), arg_dict)
 
