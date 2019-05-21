@@ -33,7 +33,7 @@
  *
  *  We do require TVM and MXNet to be built with same C++ ABI of std::function
  */
-#define TVM_RUNTIME_HEADER_ONLY 1
+// #define TVM_RUNTIME_HEADER_ONLY 1
 #include <tvm/runtime/packed_func.h>
 #include <mxnet/c_api.h>
 #include <mxnet/ndarray.h>
