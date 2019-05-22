@@ -48,8 +48,11 @@ static inline bool TVMVectorAddStorageType(const nnvm::NodeAttrs& attrs,
                                std::vector<int> *out_attrs) {
   CHECK_EQ(in_attrs->size(), 2);
   CHECK_EQ(out_attrs->size(), 1);
-  return ElemwiseBinaryOp::PreferDenseStorageType<true, true, true>(
-               attrs, dev_mask, dispatch_mode, in_attrs, out_attrs);
+  *dispatch_mode = DispatchMode::kFComputeEx;
+  in_attrs->at(0) = kDefaultStorage;
+  in_attrs->at(1) = kDefaultStorage;
+  out_attrs->at(0) = kDefaultStorage;
+  return true;
 }
 
 static void TVMVectorAddStorageComputeExGPU(const nnvm::NodeAttrs& attrs,
@@ -59,7 +62,7 @@ static void TVMVectorAddStorageComputeExGPU(const nnvm::NodeAttrs& attrs,
                                             const std::vector<NDArray>& outputs) {
   using namespace tvm::runtime;
   static const PackedFunc* f_set_stream = Registry::Get("_TVMSetStream");
-  thread_local TVMCUDAFunctor func("myadd");
+  thread_local TVMCUDAFunctor func("/home/ubuntu/Projects/tvm-compiler/build/myadd");
   CHECK_EQ(inputs.size(), 2U);
   CHECK_EQ(outputs.size(), 1U);
   func.Prepare({inputs[0], inputs[1], outputs[0]});
@@ -79,13 +82,9 @@ static void TVMVectorAddStorageComputeExGPU(const nnvm::NodeAttrs& attrs,
 NNVM_REGISTER_OP(tvm_vector_add)
 .set_num_inputs(2)
 .set_num_outputs(1)
-.set_attr<nnvm::FListInputNames>("FListInputNames",
-  [](const mxnet::NodeAttrs& attrs) {
-    return std::vector<std::string>{"a", "b"};
-  })
+.add_argument("a", "NDArray-or-Symbol", "first input")
+.add_argument("b", "NDArray-or-Symbol", "second input")
 .set_attr<mxnet::FInferShape>("FInferShape", mxnet::op::ElemwiseShape<2, 1>)
 .set_attr<nnvm::FInferType>("FInferType", mxnet::op::ElemwiseType<2, 1>)
 .set_attr<mxnet::FInferStorageType>("FInferStorageType", mxnet::op::TVMVectorAddStorageType)
-.set_attr<mxnet::FComputeEx>("FComputeEx<cpu>", mxnet::op::TVMVectorAddStorageComputeExGPU)
-.add_argument("a", "NDArray-or-Symbol", "first input")
-.add_argument("b", "NDArray-or-Symbol", "second input");
+.set_attr<mxnet::FComputeEx>("FComputeEx<gpu>", mxnet::op::TVMVectorAddStorageComputeExGPU);
